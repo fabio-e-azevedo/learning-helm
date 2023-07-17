@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+        {{- if .Values.configmap.enabled }}
+        volumeMounts:
+        - name: {{ .Release.Name }}-volume
+          mountPath: "{{ .Values.volume.mountPath }}/{{ .Values.configmap.filename }}"
+          subPath: {{ .Values.configmap.filename }}
+        {{- end }}
+      {{- if .Values.configmap.enabled }}
+      volumes:
+      - name: {{ .Release.Name }}-volume
+        configMap:
+          name: {{ .Release.Name }}-configmap
+      {{- end }}
+        {{- if .Values.secret.enabled }}
+        env:
+        - name: TEST_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secret
+              key: username
+        - name: TEST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secret
+              key: password
+        {{- end }}
