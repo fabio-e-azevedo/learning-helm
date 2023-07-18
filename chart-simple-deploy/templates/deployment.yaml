@@ -27,6 +27,17 @@ spec:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}
             memory: {{ .Values.resources.requests.memory }}
+        {{- $releaseName := .Release.Name -}}
+        {{- if .Values.secret.enabled }}
+        env:
+        {{- range $key, $val := .Values.secret.keysValues }}
+        - name: TEST_{{- $key | upper }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $releaseName }}-secret
+              key: {{ $key }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.configmap.enabled }}
         volumeMounts:
         - name: {{ .Release.Name }}-volume
@@ -39,16 +50,3 @@ spec:
         configMap:
           name: {{ .Release.Name }}-configmap
       {{- end }}
-        {{- if .Values.secret.enabled }}
-        env:
-        - name: TEST_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secret
-              key: username
-        - name: TEST_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secret
-              key: password
-        {{- end }}
