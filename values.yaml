@@ -21,9 +21,9 @@ resources:
     cpu: 80m
     memory: 128Mi
 
-secret:
+secrets:
   enabled: true
-  keysValues:
+  all:
     username: "dead_duck"
     password: "my password dead duck ;)"
 

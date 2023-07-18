@@ -27,14 +27,14 @@ spec:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}
             memory: {{ .Values.resources.requests.memory }}
-        {{- $releaseName := .Release.Name -}}
-        {{- if .Values.secret.enabled }}
+        #{{- $releaseName := .Release.Name -}}
+        {{- if .Values.secrets.enabled }}
         env:
-        {{- range $key, $val := .Values.secret.keysValues }}
+        {{- range $key, $val := .Values.secrets.all }}
         - name: TEST_{{- $key | upper }}
           valueFrom:
             secretKeyRef:
-              name: {{ $releaseName }}-secret
+              name: {{ $.Release.Name }}-secret
               key: {{ $key }}
         {{- end }}
         {{- end }}
